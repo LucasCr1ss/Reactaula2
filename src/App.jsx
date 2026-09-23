@@ -1,3 +1,7 @@
+
+
+import "../src/App.css";
+
 //importa hook useState da biblioteca React
 //Ele permite armazenas valores e atualizar valores automaticametnte
 import { useState } from "react";
@@ -18,71 +22,55 @@ const [clima, setClima] = useState("");
 const [umidade, setUmidade] = useState("");
 
 //Função executada qunado o usuario clicar no botao consultar
-function consultarClima () {
+async function consultarClima(){
+  
+  //Verifica se o campo esta vazio
+  if(cidade === " ") {
+    alert("Digite uma Cidade!");
+    return;
 
-  if (
-    cidade.toLowerCase === "são paulo" ||
-    cidade.toLowerCase() === "são paulo"
-  ) {
+  }  
 
-    //Atualiza a temperatura 
-    setTemperatura("24°");
-    
-    //Atualiza O CLIMA
-    setClima("Ensolarado");
+  try {
+  
+    //faz a requisição para a API
+    const resposta = await fetch(
+  `https://api.openweathermap.org/data/2.5/weather?q=${cidade}&appid=4f451574113db9dc8541cd1d40653f98&units=metric&lang=pt_br`
+  );
+    //converte a resposta pasa JSON
+    const dados = await resposta.json();
 
-    //Atualiza a umidade    
-    setUmidade("60%");
-  }
+    //verifica se a cidade foi encontrada 
+    if (dados.cod !== 200) {
+      alert("Cidade não encontrada!");
+      return;
+    }
 
-  else if (cidade.toLowerCase() === "curitiba" || 
-  cidade.toLowerCase() === "curitiba" ){
+    //atualiza a temperatura
+    setTemperatura(dados.main.temp + "°C");
 
-    setTemperatura("17");
-     
-    setClima("Chuvoso");
+    //atualiza a condição climatica
+    setClima(dados.weather[0].description);
 
-    setUmidade("85%");
+    //atualiza a umidade
+    setUmidade(dados.main.humidity + "%");
 
-  } 
-  else if (cidade.toLowerCase() === "goiania" || 
-  cidade.toLowerCase() === "goiania"){
+  } catch (erro) {
 
-    setTemperatura("32");
-     
-    setClima("Seco");
+    console.log(erro);
 
-    setUmidade("20%"); 
-
-  }
-  else if (cidade.toLowerCase() === "Minas Gerais" || 
-  cidade.toLowerCase() === "Minas Gerais"){
-
-    setTemperatura("22");
-     
-    setClima("Ameno");
-
-    setUmidade("50%");
+    alert("Erro ao consultar a API");
 
   }
-  else {
-    setTemperatura("--");
 
-    setCidade("Cidade não cadastrada");
-
-    setUmidade("--");
-  }
 }
+
+
 //Retorna a interface visual do sistema
 return (
 
 //container principal da aplicacao
-<div
-style={{
-  padding: "20px",
-  fontFamily: "Arial"
-}}
->
+<div className="app-container">   
 
 {/* Titulo Principal */}
 <h1>Sistema de Previsão do tempo</h1>
@@ -96,9 +84,6 @@ value={cidade}
 onChange={(e) => setCidade(e.target.value)}
 />
 
-{/* Texto exibido no botao */}
-Consultar
-
 {/* Botao de consulta */}
 <button
 
@@ -110,7 +95,8 @@ style={{
   marginLeft: "10px"
 }}
 >
-
+{/*texto exibido no botao*/}
+Consultar
 </button>
 {/* linha horizontal para separar seçoes */}
 <hr />
@@ -129,7 +115,7 @@ style={{
 
 </div>
 
-)
+);
 
 }
 //Exporta o componente Aoo para ser utilizado no react
